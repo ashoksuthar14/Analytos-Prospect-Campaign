@@ -155,12 +155,6 @@ The database will be automatically created on first run. The default path is `./
 ### 6. Run the Application
 
 ```bash
-# From project root
-python -m app.app
-```
-
-Or if you have a run script:
-```bash
 python run.py
 ```
 
@@ -239,4 +233,3 @@ pytest tests/
 ## Support
 
 [Add support contact information]
-
