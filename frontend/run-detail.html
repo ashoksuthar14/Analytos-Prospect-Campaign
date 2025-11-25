@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campaign Details - Prospect Campaign</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-chart-line"></i> Prospect Campaign</h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="sequences.html" class="nav-link">
+                        <i class="fas fa-layer-group"></i> Sequences
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="feedback.html" class="nav-link">
+                        <i class="fas fa-lightbulb"></i> Feedback
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="config.html" class="nav-link">
+                        <i class="fas fa-cog"></i> Configuration
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="campaign-detail-header">
+                <div class="header-main">
+                    <a href="index.html" class="breadcrumb-link">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                    <div class="header-title-section">
+                        <h1>Campaign Details</h1>
+                        <div class="campaign-meta">
+                            <span class="campaign-name" id="campaignNameDisplay">Loading...</span>
+                            <span class="meta-separator">•</span>
+                            <span class="run-id-display" id="runIdDisplay">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" id="exportCsvBtn">
+                        <i class="fas fa-download"></i> Export CSV
+                    </button>
+                    <button class="btn-primary-alt" id="exportJsonBtn">
+                        <i class="fas fa-download"></i> Export JSON
+                    </button>
+                </div>
+            </header>
+
+            <!-- Run Status Card -->
+            <div class="status-overview-card">
+                <div class="status-card-header">
+                    <h2>Run Status</h2>
+                    <span class="status-pill" id="runStatus">Loading...</span>
+                </div>
+                <div class="status-card-body">
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <label>Started</label>
+                            <span id="startedAt">-</span>
+                        </div>
+                        <div class="status-item">
+                            <label>Completed</label>
+                            <span id="completedAt">-</span>
+                        </div>
+                        <div class="status-item progress-item">
+                            <label>Progress</label>
+                            <div class="progress-container">
+                                <div class="progress-bar-modern">
+                                    <div class="progress-fill-modern" id="progressFill"></div>
+                                </div>
+                                <span class="progress-text" id="progressText">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agent Pipeline -->
+            <div class="card" id="liveRunCard" style="display: none;">
+                <div class="card-header live-run-header">
+                    <h2>Agent Pipeline</h2>
+                    <span class="live-run-id" id="liveRunId"></span>
+                </div>
+                <div class="card-body">
+                    <div class="agent-pipeline" id="agentPipeline">
+                        <p class="empty-state">Agent statuses will appear here as the campaign runs.</p>
+                    </div>
+
+                    <div id="humanPromptContainer" class="human-prompt hidden">
+                        <div class="human-prompt-header">
+                            <div>
+                                <h3>Human Approval Required</h3>
+                                <p id="humanPromptText">Manual input is required to continue.</p>
+                            </div>
+                            <span class="human-prompt-agent" id="humanPromptAgent"></span>
+                        </div>
+                        <form id="humanPromptForm" class="human-prompt-form">
+                            <div id="humanPromptFields" class="human-prompt-fields"></div>
+                            <div class="human-prompt-actions">
+                                <button type="button" class="btn btn-secondary" id="humanPromptDismissBtn">Close</button>
+                                <button type="submit" class="btn btn-primary" id="humanPromptSubmitBtn">
+                                    <i class="fas fa-paper-plane"></i> Submit
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="campaign-tabs">
+                <button class="campaign-tab active" data-tab="leads">
+                    <i class="fas fa-users"></i>
+                    <span>Leads</span>
+                    <span class="tab-count" id="leadsCount">0</span>
+                </button>
+                <button class="campaign-tab" data-tab="messages">
+                    <i class="fas fa-envelope"></i>
+                    <span>Messages</span>
+                    <span class="tab-count" id="messagesCount">0</span>
+                </button>
+                <button class="campaign-tab" data-tab="responses">
+                    <i class="fas fa-reply"></i>
+                    <span>Responses</span>
+                    <span class="tab-count" id="responsesCount">0</span>
+                </button>
+            </div>
+
+            <!-- Leads Tab -->
+            <div id="leadsTab" class="tab-content active">
+                <div class="tab-content-container">
+                    <div class="tab-content-header">
+                        <h2>Leads</h2>
+                        <input type="text" id="leadsSearch" class="search-input-compact" placeholder="Search leads...">
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>COMPANY</th>
+                                    <th>CONTACT</th>
+                                    <th>EMAIL</th>
+                                    <th>SCORE</th>
+                                    <th>INDUSTRY</th>
+                                    <th class="actions-col">ENRICHMENT</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leadsTableBody">
+                                <tr>
+                                    <td colspan="6" class="loading-state">
+                                        <div class="spinner"></div>
+                                        <span>Loading leads...</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-pagination" id="leadsPagination"></div>
+                </div>
+            </div>
+
+            <!-- Messages Tab -->
+            <div id="messagesTab" class="tab-content">
+                <div class="tab-content-container">
+                    <div class="tab-content-header">
+                        <h2>Messages</h2>
+                        <input type="text" id="messagesSearch" class="search-input-compact" placeholder="Search messages...">
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>SUBJECT</th>
+                                    <th>BODY PREVIEW</th>
+                                    <th>STATUS</th>
+                                    <th class="actions-col">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="messagesTableBody">
+                                <tr>
+                                    <td colspan="4" class="loading-state">
+                                        <div class="spinner"></div>
+                                        <span>Loading messages...</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-pagination" id="messagesPagination"></div>
+                </div>
+            </div>
+
+            <!-- Responses Tab -->
+            <div id="responsesTab" class="tab-content">
+                <div class="tab-content-container">
+                    <div class="tab-content-header">
+                        <h2>Email Responses</h2>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>MESSAGE ID</th>
+                                    <th>OPENED</th>
+                                    <th>CLICKED</th>
+                                    <th>REPLIED</th>
+                                    <th>MEETING</th>
+                                    <th class="actions-col">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="responsesTableBody">
+                                <tr>
+                                    <td colspan="6" class="loading-state">
+                                        <div class="spinner"></div>
+                                        <span>Loading responses...</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Message Preview Modal -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Message Preview</h2>
+                <button class="modal-close" id="closeMessageModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="message-preview">
+                    <div class="preview-item">
+                        <label>Subject:</label>
+                        <div id="previewSubject" class="preview-value"></div>
+                    </div>
+                    <div class="preview-item">
+                        <label>Body:</label>
+                        <div id="previewBody" class="preview-value"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="copyMessageBtn">
+                    <i class="fas fa-copy"></i> Copy to Clipboard
+                </button>
+                <button class="btn btn-secondary" id="closePreviewBtn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enrichment Data Modal -->
+    <div id="enrichmentModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>Lead Enrichment Data</h2>
+                <button class="modal-close" id="closeEnrichmentModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="enrichmentContent" class="enrichment-content">
+                    <!-- Enrichment data will be displayed here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="closeEnrichmentBtn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="run-detail.js"></script>
+</body>
+</html>
+

@@ -1,10 +1,10 @@
-# Prospect-to-Lead LangGraph Workflow
+# Prospect-to-Lead LangGraph Campaign
 
 An end-to-end, config-driven agent system that discovers B2B prospects, enriches & scores them, generates outreach, sends emails, tracks replies, and learns from results — all orchestrated by a single `workflow.json`.
 
 ## Features
 
-- **Config-Driven Workflow**: Define your entire prospecting workflow in a single JSON file
+- **Config-Driven Campaign**: Define your entire prospecting campaign in a single JSON file
 - **Multi-Agent System**: 7 specialized agents working in sequence
 - **Real-Time Updates**: WebSocket-based progress tracking
 - **Rate Limiting**: Built-in protection against API abuse (50 leads/run, 200/day)
@@ -42,7 +42,7 @@ This system automates the complete outbound prospecting loop:
 ├── agents/                 # Agent implementations (7 agents)
 ├── tools/                  # API integration tools
 ├── configs/                # Configuration files
-│   ├── workflow.json       # Main workflow configuration
+│   ├── workflow.json       # Main campaign configuration
 │   ├── overrides.json      # Feedback-based overrides
 │   └── service_account.json # Google Sheets credentials (add your own)
 ├── database/               # Database schema and migrations
@@ -113,6 +113,125 @@ This system automates the complete outbound prospecting loop:
    GOOGLE_SHEETS_ID=your_google_sheet_id_here
    ```
 
+### 4. Google Sheets Setup
+
+1. **Create a Google Cloud Project**:
+   - Go to [Google Cloud Console](https://console.cloud.google.com/)
+   - Create a new project or select existing one
+
+2. **Enable Google Sheets API**:
+   - Navigate to "APIs & Services" > "Library"
+   - Search for "Google Sheets API"
+   - Click "Enable"
+
+3. **Create Service Account**:
+   - Go to "APIs & Services" > "Credentials"
+   - Click "Create Credentials" > "Service Account"
+   - Fill in service account details
+   - Click "Create and Continue"
+   - Skip role assignment (optional)
+   - Click "Done"
+
+4. **Generate Service Account Key**:
+   - Click on the created service account
+   - Go to "Keys" tab
+   - Click "Add Key" > "Create new key"
+   - Select "JSON" format
+   - Download the JSON file
+   - Save it as `configs/service_account.json`
+
+5. **Share Google Sheet**:
+   - Open or create your Google Sheet
+   - Click "Share" button
+   - Add the service account email (found in the JSON file, e.g., `your-service@project.iam.gserviceaccount.com`)
+   - Give it "Editor" permissions
+   - Copy the Sheet ID from the URL (the long string between `/d/` and `/edit`)
+   - Add it to `.env` as `GOOGLE_SHEETS_ID`
+
+### 5. Database Setup
+
+The database will be automatically created on first run. The default path is `./database/prospect_workflow.db`.
+
+### 6. Run the Application
+
+```bash
+# From project root
+python -m app.app
+```
+
+Or if you have a run script:
+```bash
+python run.py
+```
+
+The application will be available at `http://localhost:5000`
+
+## Configuration
+
+### Campaign Configuration
+
+Edit `configs/workflow.json` to customize:
+- Agent order and dependencies
+- ICP criteria (industry, location, revenue, etc.)
+- Scoring weights
+- Conditional branching rules
+- Tool configurations per agent
+- Gemini prompts and tone
+
+### Rate Limits
+
+Default limits (configurable in `workflow.json`):
+- 50 leads per run
+- 200 leads per day
+
+## Usage
+
+### Starting a Campaign Run
+
+1. **Via API**:
+   ```bash
+   curl -X POST http://localhost:5000/api/run \
+     -H "Content-Type: application/json" \
+     -d '{"workflow_name": "prospect_to_lead_v1"}'
+   ```
+
+2. **Via Frontend**:
+   - Navigate to the dashboard
+   - Click "Start New Run"
+   - Monitor progress in real-time
+
+### Viewing Results
+
+- **Dashboard**: `http://localhost:5000/` - Overview of all runs
+- **Run Details**: `http://localhost:5000/runs/:id` - Detailed view of a specific run
+- **Feedback**: `http://localhost:5000/feedback` - Review and approve recommendations
+
+## Development
+
+### Running Tests
+
+```bash
+pytest tests/
+```
+
+### Code Style
+
+- Follow PEP 8
+- Use type hints
+- Add docstrings for all functions
+- Classes: PascalCase
+- Functions/variables: snake_case
+- Files/folders: lowercase
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Missing API Keys**: Ensure all required keys are in `.env`
+2. **Google Sheets Access**: Verify service account has Editor permissions
+3. **Database Lock**: Check if another process is using the database
+4. **Rate Limits**: Check API provider dashboards for usage
+
 ## License
 
 [Add your license here]
@@ -120,3 +239,4 @@ This system automates the complete outbound prospecting loop:
 ## Support
 
 [Add support contact information]
+

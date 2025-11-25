@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prospect-to-Lead Campaign - Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-chart-line"></i> Prospect Campaign</h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active">
+                    <a href="index.html" class="nav-link">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="sequences.html" class="nav-link">
+                        <i class="fas fa-layer-group"></i> Sequences
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="feedback.html" class="nav-link">
+                        <i class="fas fa-lightbulb"></i> Feedback
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="config.html" class="nav-link">
+                        <i class="fas fa-cog"></i> Configuration
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <div class="header-content">
+                    <h1>Dashboard</h1>
+                </div>
+                <button class="btn-new-campaign" id="startRunBtn">
+                    <i class="fas fa-plus"></i> New Campaign
+                </button>
+            </header>
+
+            <!-- Stats Cards -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-icon">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <h3 class="metric-label">Total Runs</h3>
+                    </div>
+                    <div class="metric-value" id="totalRuns">0</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-icon success">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h3 class="metric-label">Success Rate</h3>
+                    </div>
+                    <div class="metric-value" id="successRate">0%</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-icon info">
+                            <i class="fas fa-reply"></i>
+                        </div>
+                        <h3 class="metric-label">Reply Rate</h3>
+                    </div>
+                    <div class="metric-value" id="replyRate">0%</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-icon calendar">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <h3 class="metric-label">Meeting Rate</h3>
+                    </div>
+                    <div class="metric-value" id="meetingRate">0%</div>
+                </div>
+            </div>
+
+            <!-- Filters Bar - Compact and Integrated -->
+            <div class="table-controls">
+                <div class="table-title">
+                    <h2>Recent Runs</h2>
+                    <button class="btn-icon-refresh" id="refreshBtn" title="Refresh">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+                <div class="filters-compact">
+                    <div class="filter-item">
+                        <label>Status</label>
+                        <select id="statusFilter" class="filter-select-compact">
+                            <option value="">All</option>
+                            <option value="running">Running</option>
+                            <option value="completed">Completed</option>
+                            <option value="failed">Failed</option>
+                            <option value="waiting_approval">Waiting Approval</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label>Date Range</label>
+                        <div class="date-range-inputs">
+                            <input type="date" id="startDate" class="filter-input-compact" placeholder="Start">
+                            <span class="date-separator">-</span>
+                            <input type="date" id="endDate" class="filter-input-compact" placeholder="End">
+                        </div>
+                    </div>
+                    <button class="btn-apply-filter" id="applyFiltersBtn">
+                        Apply Filters
+                    </button>
+                </div>
+            </div>
+
+            <!-- Live Run Monitor -->
+            <div class="card" id="liveRunCard" style="display: none;">
+                <div class="card-header live-run-header">
+                    <h2>Live Run Monitor</h2>
+                    <span class="live-run-id" id="liveRunId"></span>
+                </div>
+                <div class="card-body">
+                    <div class="agent-pipeline" id="agentPipeline">
+                        <p class="empty-state">Run statuses will appear here once a campaign starts.</p>
+                    </div>
+
+                    <div id="humanPromptContainer" class="human-prompt hidden">
+                        <div class="human-prompt-header">
+                            <div>
+                                <h3>Human Approval Required</h3>
+                                <p id="humanPromptText">Manual input is required to continue.</p>
+                            </div>
+                            <span class="human-prompt-agent" id="humanPromptAgent"></span>
+                        </div>
+                        <form id="humanPromptForm" class="human-prompt-form">
+                            <div id="humanPromptFields" class="human-prompt-fields"></div>
+                            <div class="human-prompt-actions">
+                                <button type="button" class="btn btn-secondary" id="humanPromptDismissBtn">Close</button>
+                                <button type="submit" class="btn btn-primary" id="humanPromptSubmitBtn">
+                                    <i class="fas fa-paper-plane"></i> Submit
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Runs Table -->
+            <div class="runs-table-container">
+                <div class="table-wrapper">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>RUN ID</th>
+                                <th>CAMPAIGN</th>
+                                <th>STATUS</th>
+                                <th>STARTED</th>
+                                <th>PROGRESS</th>
+                                <th class="actions-col">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="runsTableBody">
+                            <tr>
+                                <td colspan="6" class="loading-state">
+                                    <div class="spinner"></div>
+                                    <span>Loading runs...</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-pagination" id="runsPagination"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Start Run Modal -->
+    <div id="startRunModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>Create New Campaign</h2>
+                <button class="modal-close" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="campaignName">Campaign Name:</label>
+                    <input type="text" id="campaignName" class="form-input" placeholder="Enter campaign name" value="Prospect to Lead v1">
+                </div>
+                
+                <div class="form-group">
+                    <label for="workflowSelect">Campaign:</label>
+                    <select id="workflowSelect" class="form-input">
+                        <option value="prospect_to_lead_v1">Prospect to Lead v1</option>
+                    </select>
+                </div>
+
+                <!-- Source Company Section -->
+                <div class="icp-details-section">
+                    <h3 class="icp-section-title">
+                        <i class="fas fa-building"></i>
+                        Your Company Information
+                    </h3>
+                    
+                    <div class="icp-form-section">
+                        <div class="icp-form-header">
+                            <i class="fas fa-info-circle"></i>
+                            <h4>Source Company Details</h4>
+                        </div>
+                        <div class="icp-form-fields">
+                            <div class="form-group">
+                                <label for="sourceCompanyName">
+                                    <i class="fas fa-building"></i>
+                                    Company Name <span class="required">*</span>
+                                </label>
+                                <input type="text" id="sourceCompanyName" class="form-input" placeholder="e.g., Analytos" value="Analytos" required>
+                                <small class="form-hint">Your company name that will be mentioned in outreach messages</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="sourceCompanyDescription">
+                                    <i class="fas fa-align-left"></i>
+                                    Company Description <span class="required">*</span>
+                                </label>
+                                <textarea id="sourceCompanyDescription" class="form-input" rows="3" placeholder="e.g., We specialize in automation and AI agent building" required>We specialize in automation and AI agent building</textarea>
+                                <small class="form-hint">Brief description of what your company does</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="sourceCompanyValueProp">
+                                    <i class="fas fa-lightbulb"></i>
+                                    How You Help Prospects <span class="required">*</span>
+                                </label>
+                                <textarea id="sourceCompanyValueProp" class="form-input" rows="4" placeholder="e.g., We help companies automate repetitive tasks, build intelligent agents, and scale operations efficiently" required>We help companies automate repetitive tasks, build intelligent agents, and scale operations efficiently through custom AI solutions</textarea>
+                                <small class="form-hint">Explain how your company can help prospects solve their problems or enhance productivity</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ICP Form Section -->
+                <div class="icp-details-section">
+                    <h3 class="icp-section-title">
+                        <i class="fas fa-bullseye"></i>
+                        Ideal Customer Profile (ICP)
+                    </h3>
+                    
+                    <!-- Target Criteria -->
+                    <div class="icp-form-section">
+                        <div class="icp-form-header">
+                            <i class="fas fa-crosshairs"></i>
+                            <h4>Target Criteria</h4>
+                        </div>
+                        <div class="icp-form-fields">
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <label for="icpIndustry">
+                                        <i class="fas fa-industry"></i>
+                                        Industry <span class="required">*</span>
+                                    </label>
+                                    <select id="icpIndustry" class="form-input" required>
+                                        <option value="">Select Industry</option>
+                                        <option value="Manufacturing">Manufacturing</option>
+                                        <option value="Technology">Technology</option>
+                                        <option value="Healthcare">Healthcare</option>
+                                        <option value="Financial Services">Financial Services</option>
+                                        <option value="Retail">Retail</option>
+                                        <option value="Professional Services">Professional Services</option>
+                                        <option value="Real Estate">Real Estate</option>
+                                        <option value="Education">Education</option>
+                                        <option value="Transportation & Logistics">Transportation & Logistics</option>
+                                        <option value="Energy & Utilities">Energy & Utilities</option>
+                                    </select>
+                                </div>
+                                <div class="form-col">
+                                    <label for="icpLocation">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        Location <span class="required">*</span>
+                                    </label>
+                                    <select id="icpLocation" class="form-input" required>
+                                        <option value="">Select Location</option>
+                                        <option value="USA">United States</option>
+                                        <option value="Canada">Canada</option>
+                                        <option value="United Kingdom">United Kingdom</option>
+                                        <option value="Germany">Germany</option>
+                                        <option value="France">France</option>
+                                        <option value="Australia">Australia</option>
+                                        <option value="India">India</option>
+                                        <option value="Singapore">Singapore</option>
+                                        <option value="Global">Global</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <label>
+                                        <i class="fas fa-users"></i>
+                                        Employee Count Range <span class="required">*</span>
+                                    </label>
+                                    <div class="range-input-group">
+                                        <select id="icpEmployeeMin" class="form-input range-select">
+                                            <option value="1">1</option>
+                                            <option value="10">10</option>
+                                            <option value="50">50</option>
+                                            <option value="100" selected>100</option>
+                                            <option value="250">250</option>
+                                            <option value="500">500</option>
+                                            <option value="1000">1,000</option>
+                                            <option value="2500">2,500</option>
+                                            <option value="5000">5,000</option>
+                                            <option value="10000">10,000</option>
+                                        </select>
+                                        <span class="range-separator">to</span>
+                                        <select id="icpEmployeeMax" class="form-input range-select">
+                                            <option value="50">50</option>
+                                            <option value="100">100</option>
+                                            <option value="250">250</option>
+                                            <option value="500">500</option>
+                                            <option value="1000" selected>1,000</option>
+                                            <option value="2500">2,500</option>
+                                            <option value="5000">5,000</option>
+                                            <option value="10000">10,000</option>
+                                            <option value="50000">50,000+</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <label>
+                                        <i class="fas fa-dollar-sign"></i>
+                                        Revenue Range (USD) <span class="required">*</span>
+                                    </label>
+                                    <div class="range-input-group">
+                                        <select id="icpRevenueMin" class="form-input range-select">
+                                            <option value="0">$0</option>
+                                            <option value="1000000">$1M</option>
+                                            <option value="5000000">$5M</option>
+                                            <option value="10000000">$10M</option>
+                                            <option value="20000000" selected>$20M</option>
+                                            <option value="50000000">$50M</option>
+                                            <option value="100000000">$100M</option>
+                                            <option value="250000000">$250M</option>
+                                            <option value="500000000">$500M</option>
+                                            <option value="1000000000">$1B</option>
+                                        </select>
+                                        <span class="range-separator">to</span>
+                                        <select id="icpRevenueMax" class="form-input range-select">
+                                            <option value="5000000">$5M</option>
+                                            <option value="10000000">$10M</option>
+                                            <option value="20000000">$20M</option>
+                                            <option value="50000000">$50M</option>
+                                            <option value="100000000">$100M</option>
+                                            <option value="200000000" selected>$200M</option>
+                                            <option value="500000000">$500M</option>
+                                            <option value="1000000000">$1B</option>
+                                            <option value="5000000000">$5B+</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Target Signals Section -->
+                    <div class="icp-form-section">
+                        <div class="icp-form-header">
+                            <i class="fas fa-signal"></i>
+                            <h4>Target Signals (Optional)</h4>
+                        </div>
+                        <div class="icp-form-fields">
+                            <!-- Hiring Signals -->
+                            <div class="signal-category">
+                                <label class="signal-category-label">
+                                    <i class="fas fa-briefcase"></i>
+                                    Hiring Signals
+                                    <span class="category-hint">Companies hiring for these roles</span>
+                                </label>
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="hiring_signals" value="hiring_for_automation_profiles">
+                                        <span>Automation Profiles</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="hiring_signals" value="hiring_for_data_science_profiles">
+                                        <span>Data Science Profiles</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="hiring_signals" value="hiring_for_digital_transformation_roles">
+                                        <span>Digital Transformation Roles</span>
+                                    </label>
+                                </div>
+                                <div class="custom-signal-input">
+                                    <div class="tags-container" id="hiringTags"></div>
+                                    <input type="text" id="customHiringSignals" class="tag-input" placeholder="+ Add custom hiring signal (press Enter)">
+                                    <small class="form-hint">Type and press Enter to add. e.g., AI Engineers, ML Specialists</small>
+                                </div>
+                            </div>
+
+                            <!-- Technology Signals -->
+                            <div class="signal-category">
+                                <label class="signal-category-label">
+                                    <i class="fas fa-laptop-code"></i>
+                                    Technology Signals
+                                    <span class="category-hint">Companies using these technologies</span>
+                                </label>
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="technology_signals" value="using_RPA_tools">
+                                        <span>RPA Tools (UiPath, Automation Anywhere)</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="technology_signals" value="using_low_code_orchestration_tools">
+                                        <span>Low-code Tools (n8n, Zapier, Make)</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="technology_signals" value="using_data_platforms">
+                                        <span>Data Platforms (Snowflake, Databricks)</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="technology_signals" value="modernizing_ERP_or_MES">
+                                        <span>ERP/MES Modernization (SAP, Oracle)</span>
+                                    </label>
+                                </div>
+                                <div class="custom-signal-input">
+                                    <div class="tags-container" id="technologyTags"></div>
+                                    <input type="text" id="customTechSignals" class="tag-input" placeholder="+ Add custom technology signal (press Enter)">
+                                    <small class="form-hint">Type and press Enter to add. e.g., Kubernetes, Docker, Terraform</small>
+                                </div>
+                            </div>
+
+                            <!-- Financial Signals -->
+                            <div class="signal-category">
+                                <label class="signal-category-label">
+                                    <i class="fas fa-chart-line"></i>
+                                    Financial Signals
+                                    <span class="category-hint">Companies with these financial activities</span>
+                                </label>
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="financial_signals" value="recent_funding_or_expansion">
+                                        <span>Recent Funding or Expansion</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="financial_signals" value="announced_cost_reduction_initiatives">
+                                        <span>Cost Reduction Initiatives</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="financial_signals" value="investment_in_AI_or_digital_transformation">
+                                        <span>AI/Digital Transformation Investment</span>
+                                    </label>
+                                </div>
+                                <div class="custom-signal-input">
+                                    <div class="tags-container" id="financialTags"></div>
+                                    <input type="text" id="customFinancialSignals" class="tag-input" placeholder="+ Add custom financial signal (press Enter)">
+                                    <small class="form-hint">Type and press Enter to add. e.g., IPO Planning, M&A Activity</small>
+                                </div>
+                            </div>
+
+                            <!-- Behavioral Signals -->
+                            <div class="signal-category">
+                                <label class="signal-category-label">
+                                    <i class="fas fa-user-check"></i>
+                                    Behavioral Signals
+                                    <span class="category-hint">Companies exhibiting these behaviors</span>
+                                </label>
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="behavioral_signals" value="leaders_posting_about_AI_or_automation">
+                                        <span>Leaders Posting About AI/Automation</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="behavioral_signals" value="attending_automation_events">
+                                        <span>Attending Automation Events</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="behavioral_signals" value="participating_in_Industry_4.0_or_digital_factory_initiatives">
+                                        <span>Industry 4.0 Participation</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="behavioral_signals" value="collaborating_with_AI_or_automation_partners">
+                                        <span>AI/Automation Partnerships</span>
+                                    </label>
+                                </div>
+                                <div class="custom-signal-input">
+                                    <div class="tags-container" id="behavioralTags"></div>
+                                    <input type="text" id="customBehavioralSignals" class="tag-input" placeholder="+ Add custom behavioral signal (press Enter)">
+                                    <small class="form-hint">Type and press Enter to add. e.g., Speaking at Conferences</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Early Adopter Scoring Section -->
+                    <div class="icp-form-section">
+                        <div class="icp-form-header">
+                            <i class="fas fa-star"></i>
+                            <h4>Scoring Weights</h4>
+                        </div>
+                        <div class="icp-form-fields">
+                            <div class="info-banner">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Adjust weights to prioritize different signals. Total automatically maintains 100%.</span>
+                            </div>
+                            <div class="scoring-weights">
+                                <div class="weight-slider">
+                                    <label for="hiringWeight">
+                                        <i class="fas fa-briefcase"></i>
+                                        Hiring Signals Weight
+                                        <span class="weight-value" id="hiringWeightValue">20%</span>
+                                    </label>
+                                    <input type="range" id="hiringWeight" class="slider" min="0" max="100" value="20" step="5">
+                                </div>
+
+                                <div class="weight-slider">
+                                    <label for="technologyWeight">
+                                        <i class="fas fa-laptop-code"></i>
+                                        Technology Signals Weight
+                                        <span class="weight-value" id="technologyWeightValue">30%</span>
+                                    </label>
+                                    <input type="range" id="technologyWeight" class="slider" min="0" max="100" value="30" step="5">
+                                </div>
+
+                                <div class="weight-slider">
+                                    <label for="financialWeight">
+                                        <i class="fas fa-chart-line"></i>
+                                        Financial Signals Weight
+                                        <span class="weight-value" id="financialWeightValue">25%</span>
+                                    </label>
+                                    <input type="range" id="financialWeight" class="slider" min="0" max="100" value="25" step="5">
+                                </div>
+
+                                <div class="weight-slider">
+                                    <label for="behavioralWeight">
+                                        <i class="fas fa-user-check"></i>
+                                        Behavioral Signals Weight
+                                        <span class="weight-value" id="behavioralWeightValue">25%</span>
+                                    </label>
+                                    <input type="range" id="behavioralWeight" class="slider" min="0" max="100" value="25" step="5">
+                                </div>
+
+                                <div class="weight-total">
+                                    <strong>Total Weight:</strong>
+                                    <span id="totalWeight" class="total-value">100%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Optional: Advanced Settings (Collapsed by default) -->
+                    <div class="advanced-settings-toggle">
+                        <button type="button" class="btn-collapse" id="toggleAdvanced">
+                            <i class="fas fa-chevron-down"></i>
+                            Advanced Settings (Optional)
+                        </button>
+                    </div>
+                    <div id="advancedSettings" class="advanced-settings-content" style="display: none;">
+                        <div class="form-group">
+                            <label for="maxResults">
+                                <i class="fas fa-list-ol"></i>
+                                Maximum Prospect to Fetch
+                            </label>
+                            <input type="number" id="maxResults" class="form-input" value="5" min="1" max="100">
+                            <small class="form-hint">Number of leads to find in this campaign (1-100)</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="useOverrides">
+                        Use custom configuration overrides
+                    </label>
+                </div>
+                <div id="overridesSection" class="form-group" style="display: none;">
+                    <label for="configOverrides">Configuration Overrides (JSON):</label>
+                    <textarea id="configOverrides" class="form-input" rows="6" placeholder='{"agents": {...}}'></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelRunBtn">Cancel</button>
+                <button class="btn btn-primary" id="confirmRunBtn">
+                    <i class="fas fa-play"></i> Start Campaign
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
+

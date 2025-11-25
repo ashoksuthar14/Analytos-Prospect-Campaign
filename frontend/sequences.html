@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sequences - Prospect Campaign</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-chart-line"></i>
+                <span>Prospect Campaign</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="sequences.html" class="nav-link">
+                        <i class="fas fa-layer-group"></i>
+                        <span>Sequences</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="feedback.html" class="nav-link">
+                        <i class="fas fa-lightbulb"></i>
+                        <span>Feedback</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="config.html" class="nav-link">
+                        <i class="fas fa-cog"></i>
+                        <span>Configuration</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <h1>Sequences</h1>
+                    <p class="header-subtitle">Add contacts to Apollo sequences for automated outreach</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" id="refreshSequencesBtn">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Refresh Sequences</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Step 1: Select Sequence -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-header-left">
+                        <i class="fas fa-layer-group"></i>
+                        <h2>Step 1: Select Apollo Sequence</h2>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Tabs -->
+                    <div class="tabs">
+                        <button class="tab-btn active" data-tab="search">Search Sequences</button>
+                        <button class="tab-btn" data-tab="automate">Automate</button>
+                    </div>
+
+                    <!-- Tab Content: Search Sequences -->
+                    <div class="tab-content active" id="search-tab">
+                        <div class="sequence-input-section">
+                        <!-- Search Sequences -->
+                        <div class="search-sequences-group">
+                            <label class="input-label">Search Available Sequences</label>
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="sequenceSearch" class="search-input" placeholder="Type to search sequences by name...">
+                        </div>
+                    </div>
+                    
+                    <div id="sequencesList" class="sequences-grid">
+                        <p class="loading-state">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            Loading sequences...
+                        </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content: Automate -->
+                    <div class="tab-content" id="automate-tab">
+                        <div class="sequence-input-section">
+                            <p class="section-description">
+                                <i class="fas fa-magic"></i>
+                                Automatically add contacts to a sequence based on their score
+                            </p>
+                            
+                            <!-- Sequence Selector -->
+                            <div class="form-group">
+                                <label class="input-label">
+                                    <i class="fas fa-layer-group"></i>
+                                    Select Sequence
+                                </label>
+                                <select id="automateSequenceSelect" class="form-input">
+                                    <option value="">Loading sequences...</option>
+                                </select>
+                                <small class="input-hint">
+                                    <i class="fas fa-info-circle"></i>
+                                    Choose the Apollo sequence where contacts will be added
+                                </small>
+                            </div>
+
+                            <!-- Score Condition Selector -->
+                            <div class="form-group">
+                                <label class="input-label">
+                                    <i class="fas fa-chart-line"></i>
+                                    Score Condition
+                                </label>
+                                <select id="scoreConditionSelect" class="form-input">
+                                    <option value="70">Score ≥ 70 (Top Tier)</option>
+                                    <option value="60" selected>Score ≥ 60 (High Quality)</option>
+                                    <option value="50">Score ≥ 50 (Good)</option>
+                                    <option value="40">Score ≥ 40 (Medium)</option>
+                                    <option value="30">Score ≥ 30 (Low)</option>
+                                    <option value="20">Score ≥ 20 (All)</option>
+                                    <option value="0">Score ≥ 0 (Include All)</option>
+                                </select>
+                                <small class="input-hint">
+                                    <i class="fas fa-info-circle"></i>
+                                    Only contacts with scores meeting this condition will be selected
+                                </small>
+                            </div>
+
+                            <!-- Preview Section -->
+                            <div class="automate-preview">
+                                <div class="preview-header">
+                                    <i class="fas fa-users"></i>
+                                    <h4>Contacts Preview</h4>
+                                </div>
+                                <div class="preview-stats">
+                                    <div class="preview-stat">
+                                        <span class="stat-value" id="totalContactsCount">0</span>
+                                        <span class="stat-label">Total Contacts</span>
+                                    </div>
+                                    <div class="preview-stat">
+                                        <span class="stat-value" id="matchingContactsCount">0</span>
+                                        <span class="stat-label">Matching Score</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="automate-actions">
+                                <button class="btn btn-secondary" id="previewContactsBtn">
+                                    <i class="fas fa-eye"></i>
+                                    Preview Contacts
+                                </button>
+                                <button class="btn btn-primary" id="automateAddToSequenceBtn" disabled>
+                                    <i class="fas fa-magic"></i>
+                                    Add Matching Contacts to Sequence
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Select Contacts -->
+            <div class="card" id="contactSelectCard" style="display: none;">
+                <div class="card-header">
+                    <div class="card-header-left">
+                        <i class="fas fa-users"></i>
+                        <h2>Step 2: Select Contacts</h2>
+                    </div>
+                    <div class="card-header-right">
+                        <span class="selection-badge" id="selectedCountBadge">0 selected</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-controls">
+                        <div class="table-controls-left">
+                            <button class="btn btn-secondary btn-sm" id="selectAllBtn">
+                                <i class="fas fa-check-square"></i>
+                                <span>Select All</span>
+                            </button>
+                            <button class="btn btn-secondary btn-sm" id="deselectAllBtn">
+                                <i class="fas fa-square"></i>
+                                <span>Deselect All</span>
+                            </button>
+                        </div>
+                        <div class="table-controls-right">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="contactSearch" class="search-input" placeholder="Search contacts...">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th class="checkbox-col">
+                                        <input type="checkbox" id="selectAllCheckbox">
+                                    </th>
+                                    <th>Company</th>
+                                    <th>Contact</th>
+                                    <th>Email</th>
+                                    <th>Title</th>
+                                    <th>Score</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contactsTableBody">
+                                <tr>
+                                    <td colspan="6" class="empty-state-cell">
+                                        <i class="fas fa-inbox"></i>
+                                        <p>Select a sequence first...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div id="contactsPagination"></div>
+                    
+                    <div class="action-footer">
+                        <div class="action-footer-left">
+                            <span class="selected-count-text">
+                                <strong><span id="selectedContactCount">0</span> contacts</strong> selected
+                            </span>
+                        </div>
+                        <div class="action-footer-right">
+                            <button class="btn btn-primary" id="addToSequenceBtn" disabled>
+                                <i class="fas fa-plus-circle"></i>
+                                <span>Add to Sequence</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="card" id="resultsCard" style="display: none;">
+                <div class="card-header">
+                    <div class="card-header-left">
+                        <i class="fas fa-check-circle"></i>
+                        <h2>Results</h2>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="resultsContent"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="sequences.js"></script>
+</body>
+</html>
+

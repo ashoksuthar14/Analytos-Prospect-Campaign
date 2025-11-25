@@ -1,0 +1,63 @@
+[
+  {
+    "company_name": "RevOps Global",
+    "domain": "revopsglobal.com",
+    "contact_email": "greg@revopsglobal.com",
+    "contact_name": "Gregory Harmon",
+    "contact_title": "Founder & CEO",
+    "revenue": 1500000,
+    "employee_count": 18,
+    "industry": "Marketing & Advertising",
+    "location": "Ridgefield, CT",
+    "source": "sample_dataset"
+  },
+  {
+    "company_name": "Origin 63",
+    "domain": "origin63.com",
+    "contact_email": "sam@origin63.com",
+    "contact_name": "Sam Anderson",
+    "contact_title": "Co-Founder & CEO",
+    "revenue": 2500000,
+    "employee_count": 24,
+    "industry": "Information Technology & Services",
+    "location": "San Diego, CA",
+    "source": "sample_dataset"
+  },
+  {
+    "company_name": "Instrumental Group",
+    "domain": "revriv.com",
+    "contact_email": "eric@revriv.com",
+    "contact_name": "Eric Pratt",
+    "contact_title": "Founder & CEO",
+    "revenue": 3400000,
+    "employee_count": 42,
+    "industry": "Computer Software",
+    "location": "Golden, CO",
+    "source": "sample_dataset"
+  },
+  {
+    "company_name": "RevPartners",
+    "domain": "revpartners.io",
+    "contact_email": "brendan@revpartners.io",
+    "contact_name": "Brendan Tolleson",
+    "contact_title": "CEO & Co-Founder",
+    "revenue": 4200000,
+    "employee_count": 55,
+    "industry": "CRM Consulting",
+    "location": "Atlanta, GA",
+    "source": "sample_dataset"
+  },
+  {
+    "company_name": "Orange Marketing",
+    "domain": "orangemarketing.com",
+    "contact_email": "rebecca@orangemarketing.com",
+    "contact_name": "Rebecca Gonzalez",
+    "contact_title": "Managing Partner",
+    "revenue": 2800000,
+    "employee_count": 30,
+    "industry": "Marketing & Advertising",
+    "location": "Irvine, CA",
+    "source": "sample_dataset"
+  }
+]
+

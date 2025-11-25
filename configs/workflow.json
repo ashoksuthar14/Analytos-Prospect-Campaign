@@ -1,0 +1,374 @@
+{
+  "workflow_name": "prospect_to_lead_v1",
+  "description": "End-to-end B2B prospecting campaign from discovery to outreach and feedback",
+  "version": "1.0.0",
+  "rate_limits": {
+    "leads_per_run": 5,
+    "leads_per_day": 200
+  },
+  "agents": [
+    {
+      "name": "prospect_search",
+      "class": "ProspectSearchAgent",
+      "description": "Discovers B2B prospects matching ICP criteria",
+      "dependencies": [],
+      "inputs": {
+        "icp": {
+          "industry": "Manufacturing",
+          "location": "USA",
+          "employee_count": {
+            "min": 100,
+            "max": 1000
+          },
+          "revenue": {
+            "min": 20000000,
+            "max": 200000000
+          }
+        },
+        "signals": {
+          "hiring": [
+            "hiring_for_automation_profiles",
+            "hiring_for_data_science_profiles",
+            "hiring_for_digital_transformation_roles"
+          ],
+          "technology": [
+            "using_RPA_tools (UiPath, Automation Anywhere, Blue Prism)",
+            "using_low_code_orchestration_tools (n8n, Make, Zapier, Workato)",
+            "using_data_platforms (Snowflake, Databricks, PowerBI)",
+            "modernizing_ERP_or_MES (SAP S/4HANA, Oracle Cloud)"
+          ],
+          "financial": [
+            "recent_funding_or_expansion",
+            "announced_cost_reduction_initiatives",
+            "investment_in_AI_or_digital_transformation"
+          ],
+          "behavioral": [
+            "leaders_posting_about_AI_or_automation",
+            "attending_automation_events",
+            "participating_in_Industry_4.0_or_digital_factory_initiatives",
+            "collaborating_with_AI_or_automation_partners"
+          ]
+        }
+      },
+      "tools": ["apollo_api"],
+      "tool_config": {
+        "primary": "apollo_api",
+        "max_results": 5
+      },
+      "output_schema": {
+        "type": "array",
+        "items": {
+          "company_name": "string",
+          "domain": "string",
+          "contact_email": "string",
+          "contact_name": "string",
+          "contact_title": "string",
+          "revenue": "number",
+          "employee_count": "number",
+          "industry": "string",
+          "location": "string"
+        }
+      },
+      "conditional_branching": null
+    },
+    {
+      "name": "data_enrichment",
+      "class": "DataEnrichmentAgent",
+      "description": "Enriches leads with additional firmographic and technographic data",
+      "dependencies": ["prospect_search"],
+      "inputs": {
+        "leads": "{{prospect_search.output}}"
+      },
+      "tools": ["apollo_api"],
+      "tool_config": {
+        "primary": "apollo_api"
+      },
+      "output_schema": {
+        "type": "array",
+        "items": {
+          "company_name": "string",
+          "domain": "string",
+          "contact_email": "string",
+          "contact_name": "string",
+          "contact_title": "string",
+          "revenue": "number",
+          "employee_count": "number",
+          "industry": "string",
+          "location": "string",
+          "enrichment": {
+            "linkedin_url": "string",
+            "tech_stack": "array",
+            "firmographics": "object",
+            "role_details": "object"
+          }
+        }
+      },
+      "conditional_branching": null
+    },
+    {
+      "name": "scoring",
+      "class": "ScoringAgent",
+      "description": "Ranks leads by weighted scoring criteria",
+      "dependencies": ["data_enrichment"],
+      "inputs": {
+        "leads": "{{data_enrichment.output}}"
+      },
+      "tools": [],
+      "tool_config": {
+        "normalize_to": 100,
+        "early_adopter_score": {
+          "criteria_weights": {
+            "hiring": 20,
+            "technology": 30,
+            "financial": 25,
+            "behavioral": 25
+          },
+          "scoring_logic": {
+            "total_score": "sum_of_detected_signal_weights",
+            "classification_thresholds": {
+              "Innovator": "score > 80",
+              "Early Adopter": "score >= 60 and <= 80",
+              "Early Majority": "score >= 40 and < 60",
+              "Late Majority": "score >= 20 and < 40",
+              "Laggard": "score < 20"
+            }
+          },
+          "output_example": {
+            "behavioral_score": 20,
+            "technology_score": 25,
+            "hiring_score": 15,
+            "financial_score": 10,
+            "total_score": 70,
+            "classification": "Early Adopter"
+          }
+        }
+      },
+      "output_schema": {
+        "type": "array",
+        "items": {
+          "lead": "object",
+          "score": "number",
+          "fit_score": "number",
+          "engagement_score": "number",
+          "intent_score": "number"
+        }
+      },
+      "conditional_branching": {
+        "condition": "score < 50",
+        "action": "skip_next",
+        "next_agent": "apollo_contact_sync"
+      }
+    },
+    {
+      "name": "apollo_contact_sync",
+      "class": "ApolloContactSyncAgent",
+      "description": "Syncs scored leads to Apollo as contacts",
+      "dependencies": ["scoring"],
+      "inputs": {
+        "leads": "{{scoring.output}}"
+      },
+      "tools": ["apollo_api"],
+      "tool_config": {
+        "min_score_threshold": 0,
+        "max_leads_to_sync": null
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "leads": "array",
+          "synced_count": "number",
+          "failed_count": "number",
+          "skipped_count": "number",
+          "sync_results": "array"
+        }
+      },
+      "conditional_branching": null
+    },
+    {
+      "name": "outreach_content",
+      "class": "OutreachContentAgent",
+      "description": "Generates personalized outreach messages using Groq",
+      "dependencies": ["apollo_contact_sync"],
+      "inputs": {
+        "ranked_leads": "{{apollo_contact_sync.output}}",
+        "top_n": 20,
+        "source_company": {
+          "name": "Analytos",
+          "description": "We specialize in automation and AI agent building",
+          "value_proposition": "We help companies automate repetitive tasks, build intelligent agents, and scale operations efficiently through custom AI solutions"
+        }
+      },
+      "tools": ["groq_api"],
+      "tool_config": {
+        "model": "llama-3.3-70b-versatile",
+        "temperature": 0.8,
+        "max_tokens": 500,
+        "tone": "friendly, concise, value-driven",
+        "personalization_fields": ["company_name", "role", "signal", "tech_stack"]
+      },
+      "output_schema": {
+        "type": "array",
+        "items": {
+          "lead_id": "string",
+          "subject": "string",
+          "body": "string",
+          "personalization_used": "array"
+        }
+      },
+      "conditional_branching": null
+    },
+    {
+      "name": "apollo_content_sync",
+      "class": "ApolloContactSyncAgent",
+      "description": "Updates Apollo contacts with outreach message data",
+      "dependencies": ["outreach_content"],
+      "inputs": {
+        "leads": "{{apollo_contact_sync.output}}"
+      },
+      "tools": ["apollo_api"],
+      "tool_config": {
+        "min_score_threshold": 0,
+        "max_leads_to_sync": null
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "leads": "array",
+          "synced_count": "number",
+          "failed_count": "number",
+          "skipped_count": "number",
+          "sync_results": "array"
+        }
+      },
+      "conditional_branching": null
+    },
+    {
+      "name": "outreach_executor",
+      "class": "OutreachExecutorAgent",
+      "description": "Sends outreach emails via SendGrid or Apollo",
+      "dependencies": ["apollo_content_sync"],
+      "inputs": {
+        "messages": "{{outreach_content.output}}"
+      },
+      "tools": ["sendgrid_api", "apollo_send_api"],
+      "human_in_loop": {
+        "enabled": true,
+        "prompt": "Review and approve outreach messages before they are sent.",
+        "description": "Confirm the outreach copy, recipients, and sender details before dispatching emails.",
+        "fields": [
+          {
+            "name": "approval",
+            "type": "boolean",
+            "label": "Approve sending outreach emails",
+            "default": true
+          },
+          {
+            "name": "notes",
+            "type": "string",
+            "label": "Reviewer notes",
+            "required": false
+          }
+        ],
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "approval": {
+              "type": "boolean"
+            },
+            "notes": {
+              "type": "string"
+            }
+          },
+          "required": ["approval"]
+        }
+      },
+      "tool_config": {
+        "primary": "sendgrid_api",
+        "fallback": "apollo_send_api",
+        "from_email": "your-email@domain.com",
+        "from_name": "Your Name"
+      },
+      "output_schema": {
+        "type": "array",
+        "items": {
+          "message_id": "string",
+          "lead_id": "string",
+          "status": "string",
+          "sent_at": "string",
+          "provider": "string"
+        }
+      },
+      "conditional_branching": null
+    },
+    {
+      "name": "response_tracker",
+      "class": "ResponseTrackerAgent",
+      "description": "Tracks email opens, clicks, replies, and meeting bookings",
+      "dependencies": ["outreach_executor"],
+      "inputs": {
+        "message_ids": "{{outreach_executor.output}}"
+      },
+      "tools": ["sendgrid_api", "apollo_api"],
+      "tool_config": {
+        "poll_interval_hours": 24,
+        "track_opens": true,
+        "track_clicks": true,
+        "track_replies": true,
+        "track_meetings": true
+      },
+      "output_schema": {
+        "type": "array",
+        "items": {
+          "message_id": "string",
+          "opened": "boolean",
+          "opened_at": "string",
+          "clicked": "boolean",
+          "clicked_at": "string",
+          "replied": "boolean",
+          "replied_at": "string",
+          "meeting_scheduled": "boolean",
+          "meeting_at": "string"
+        }
+      },
+      "conditional_branching": null
+    },
+    {
+      "name": "feedback_trainer",
+      "class": "FeedbackTrainerAgent",
+      "description": "Analyzes performance and generates optimization recommendations",
+      "dependencies": ["response_tracker"],
+      "inputs": {
+        "responses": "{{response_tracker.output}}",
+        "messages": "{{outreach_content.output}}",
+        "leads": "{{scoring.output}}"
+      },
+      "tools": ["gemini_api", "google_sheets_api"],
+      "tool_config": {
+        "analytics_metrics": ["open_rate", "reply_rate", "meeting_rate"],
+        "analysis_dimensions": ["subject_line", "persona", "icp_filter"],
+        "sheets_id": "",
+        "sheets_range": "Feedback!A:E",
+        "model": "gemini-2.5-flash"
+      },
+      "output_schema": {
+        "type": "object",
+        "recommendations": "array",
+        "metrics": {
+          "open_rate": "number",
+          "reply_rate": "number",
+          "meeting_rate": "number"
+        },
+        "status": "waiting_approval"
+      },
+      "conditional_branching": null
+    }
+  ],
+  "global_config": {
+    "debug_mode": false,
+    "log_level": "INFO",
+    "enable_full_traces": false,
+    "retry_attempts": 3,
+    "retry_backoff_multiplier": 2
+  }
+}
+

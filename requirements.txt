@@ -1,0 +1,46 @@
+# Web Framework
+Flask==3.0.0
+flask-socketio==5.3.5
+python-socketio==5.10.0
+flask-cors==4.0.0
+
+# LangGraph & LangChain
+langgraph
+langchain-core
+langchain-google-genai
+langchain-community
+
+# Google AI SDK
+google-generativeai
+google-api-python-client
+google-auth
+google-auth-httplib2
+google-auth-oauthlib
+
+# API Clients
+requests==2.31.0
+httpx==0.25.2
+sendgrid==6.11.0
+openai>=1.0.0
+groq>=0.4.0
+
+# Database
+# sqlite3 is built into Python, no installation needed
+
+# Data Processing
+pandas==2.1.4
+numpy==1.26.2
+
+# Utilities
+python-dotenv==1.0.0
+pydantic==2.5.3
+jsonschema==4.20.0
+
+# Logging & Observability
+structlog==24.1.0
+
+# Testing (optional for Phase 1, but included for completeness)
+pytest==7.4.3
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+

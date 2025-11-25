@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback & Recommendations - Prospect Workflow</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-chart-line"></i> Prospect Workflow</h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="sequences.html" class="nav-link">
+                        <i class="fas fa-layer-group"></i> Sequences
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="feedback.html" class="nav-link">
+                        <i class="fas fa-lightbulb"></i> Feedback
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="config.html" class="nav-link">
+                        <i class="fas fa-cog"></i> Configuration
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <h1>Feedback & Recommendations</h1>
+                <button class="btn btn-primary" id="refreshFeedbackBtn">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </header>
+
+            <!-- Info Card -->
+            <div class="info-card">
+                <i class="fas fa-info-circle"></i>
+                <p>Review and approve recommendations from the Feedback Trainer. Approved recommendations will be applied to the workflow configuration.</p>
+            </div>
+
+            <!-- Pending Recommendations -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Pending Recommendations</h2>
+                    <span class="badge" id="pendingCount">0</span>
+                </div>
+                <div class="card-body">
+                    <div id="recommendationsList" class="recommendations-list">
+                        <div class="loading">Loading recommendations...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Approved Recommendations -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Recently Approved</h2>
+                </div>
+                <div class="card-body">
+                    <div id="approvedList" class="recommendations-list">
+                        <div class="empty-state">No approved recommendations yet.</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Recommendation Detail Modal -->
+    <div id="recommendationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Recommendation Details</h2>
+                <button class="modal-close" id="closeRecModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="recommendation-detail">
+                    <div class="detail-item">
+                        <label>Field:</label>
+                        <div id="detailField" class="detail-value"></div>
+                    </div>
+                    <div class="detail-item">
+                        <label>Current Value:</label>
+                        <div id="detailOldValue" class="detail-value"></div>
+                    </div>
+                    <div class="detail-item">
+                        <label>Proposed Value:</label>
+                        <div id="detailNewValue" class="detail-value highlight"></div>
+                    </div>
+                    <div class="detail-item">
+                        <label>Reason:</label>
+                        <div id="detailReason" class="detail-value"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelApprovalBtn">Cancel</button>
+                <button class="btn btn-primary" id="confirmApprovalBtn">
+                    <i class="fas fa-check"></i> Approve Recommendation
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="feedback.js"></script>
+</body>
+</html>
+

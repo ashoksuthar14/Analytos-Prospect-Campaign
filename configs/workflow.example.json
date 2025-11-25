@@ -1,0 +1,194 @@
+{
+  "workflow_name": "prospect_to_lead_v1",
+  "description": "End-to-end B2B prospecting workflow",
+  "rate_limits": {
+    "leads_per_run": 50,
+    "leads_per_day": 200
+  },
+  "agents": {
+    "prospect_search": {
+      "description": "Discovers B2B prospects matching ICP",
+      "depends_on": [],
+      "inputs": {
+        "icp": {
+          "industry": ["SaaS", "Technology"],
+          "location": ["United States"],
+          "revenue_range": {
+            "min": 20000000,
+            "max": 200000000
+          },
+          "employee_count": {
+            "min": 100,
+            "max": 1000
+          },
+          "signals": ["recent_funding", "hiring_for_sales"],
+          "tech_stack": ["Salesforce", "HubSpot"]
+        }
+      },
+      "tools": ["clay_api", "apollo_api"],
+      "tool_config": {
+        "max_results": 50,
+        "timeout": 30,
+        "retry_attempts": 3
+      },
+      "output_schema": {
+        "leads": [
+          {
+            "company_name": "string",
+            "contact_name": "string",
+            "contact_email": "string",
+            "source": "string"
+          }
+        ]
+      }
+    },
+    "data_enrichment": {
+      "description": "Enriches lead data with additional information",
+      "depends_on": ["prospect_search"],
+      "inputs": {
+        "leads": "{{prospect_search.output.leads}}"
+      },
+      "tools": ["clearbit_api", "pdl_api"],
+      "tool_config": {
+        "enrichment_fields": ["company_data", "person_data", "tech_stack"],
+        "timeout": 30,
+        "retry_attempts": 3
+      },
+      "output_schema": {
+        "enriched_leads": [
+          {
+            "company_name": "string",
+            "contact_name": "string",
+            "contact_email": "string",
+            "enriched_data": {}
+          }
+        ]
+      }
+    },
+    "scoring": {
+      "description": "Ranks leads based on weighted criteria",
+      "depends_on": ["data_enrichment"],
+      "inputs": {
+        "leads": "{{data_enrichment.output.enriched_leads}}"
+      },
+      "scoring_weights": {
+        "fit_score": 0.5,
+        "engagement": 0.3,
+        "intent": 0.2
+      },
+      "conditional_branching": {
+        "enabled": true,
+        "conditions": [
+          {
+            "condition": "score < 50",
+            "action": "skip",
+            "next_agent": null
+          }
+        ]
+      },
+      "output_schema": {
+        "ranked_leads": [
+          {
+            "lead_id": "string",
+            "score": "number",
+            "criteria_breakdown": {}
+          }
+        ]
+      }
+    },
+    "outreach_content": {
+      "description": "Generates personalized email content",
+      "depends_on": ["scoring"],
+      "inputs": {
+        "leads": "{{scoring.output.ranked_leads}}"
+      },
+      "tools": ["gemini"],
+      "tool_config": {
+        "tone": "friendly, concise, value-driven",
+        "ab_testing": {
+          "enabled": true,
+          "variants": ["variant_a", "variant_b"]
+        }
+      },
+      "output_schema": {
+        "messages": [
+          {
+            "lead_id": "string",
+            "subject": "string",
+            "body": "string",
+            "variant": "string"
+          }
+        ]
+      }
+    },
+    "outreach_executor": {
+      "description": "Sends emails via SendGrid or Apollo",
+      "depends_on": ["outreach_content"],
+      "inputs": {
+        "messages": "{{outreach_content.output.messages}}"
+      },
+      "tools": ["sendgrid_api", "apollo_api"],
+      "tool_config": {
+        "provider": "sendgrid",
+        "from_email": "your-email@company.com",
+        "from_name": "Your Name"
+      },
+      "output_schema": {
+        "sent_messages": [
+          {
+            "message_id": "string",
+            "lead_id": "string",
+            "status": "string",
+            "sent_at": "string"
+          }
+        ]
+      }
+    },
+    "response_tracker": {
+      "description": "Monitors email engagement (opens, clicks, replies)",
+      "depends_on": ["outreach_executor"],
+      "inputs": {
+        "messages": "{{outreach_executor.output.sent_messages}}"
+      },
+      "tools": ["sendgrid_api", "apollo_api"],
+      "tool_config": {
+        "tracking_interval_hours": 24,
+        "max_checks": 7
+      },
+      "output_schema": {
+        "responses": [
+          {
+            "message_id": "string",
+            "type": "string",
+            "received_at": "string",
+            "content": "string"
+          }
+        ]
+      }
+    },
+    "feedback_trainer": {
+      "description": "Analyzes performance and generates optimization recommendations",
+      "depends_on": ["response_tracker"],
+      "inputs": {
+        "run_id": "{{run_id}}",
+        "responses": "{{response_tracker.output.responses}}"
+      },
+      "tools": ["google_sheets_api"],
+      "tool_config": {
+        "sheets_id": "your-sheet-id",
+        "analysis_metrics": ["open_rate", "reply_rate", "meeting_rate"]
+      },
+      "output_schema": {
+        "recommendations": [
+          {
+            "field": "string",
+            "old_value": "any",
+            "new_value": "any",
+            "reason": "string"
+          }
+        ]
+      }
+    }
+  }
+}
+

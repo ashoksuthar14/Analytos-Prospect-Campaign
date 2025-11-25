@@ -1,0 +1,36 @@
+"""
+API Keys Configuration - Template file.
+Copy this to api_keys.py and fill in your actual API keys.
+For production, use environment variables or a secure secrets manager.
+"""
+
+# Clay API - For prospect search and data enrichment
+CLAY_API_KEY = "your_clay_api_key_here"
+
+# Apollo API - For prospect search, enrichment, and email tracking
+APOLLO_API_KEY = "your_apollo_api_key_here"
+
+# OpenAI API - For LLM content generation and web search
+OPENAI_API_KEY = "your_openai_api_key_here"
+
+# Gemini API - Alternative LLM provider
+GEMINI_API_KEY = "your_gemini_api_key_here"
+
+# Groq API - For fast LLM inference (outreach message generation)
+GROQ_API_KEY = "your_groq_api_key_here"
+
+# Hunter.io API - For email finding and verification
+HUNTER_API_KEY = "your_hunter_api_key_here"
+
+# SendGrid API - For email delivery
+SENDGRID_API_KEY = "your_sendgrid_api_key_here"
+
+# Clearbit API - For company data enrichment
+CLEARBIT_API_KEY = "your_clearbit_api_key_here"
+
+# People Data Labs API - For person data enrichment
+PDL_API_KEY = "your_pdl_api_key_here"
+
+# Explorium API - For data enrichment
+EXPLORIUM_API_KEY = "your_explorium_api_key_here"
+
